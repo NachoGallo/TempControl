@@ -18,7 +18,7 @@ Lightweight portable Windows desktop app for real-time hardware temperature moni
 
 ## Screenshot
 
-> _Add a screenshot here_
+![TempControl](docs/screenshot.png)
 
 ## Installation
 
