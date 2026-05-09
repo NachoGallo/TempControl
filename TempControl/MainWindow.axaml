@@ -1,0 +1,311 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:TempControl.ViewModels"
+        x:Class="TempControl.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="TempControl"
+        Icon="avares://TempControl/Assets/app.ico"
+        Width="420" MinWidth="420"
+        Height="600" MinHeight="460"
+        Background="#1A1A2E"
+        Topmost="{Binding IsAlwaysOnTop}">
+
+    <Window.Styles>
+        <Style Selector="TextBlock.label">
+            <Setter Property="Foreground" Value="#9E9E9E"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+        <Style Selector="TextBlock.value">
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="TextBlock.groupTitle">
+            <Setter Property="Foreground" Value="#E0E0E0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style Selector="Button.cardHeader">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Padding" Value="14,12"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.cardHeader:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#15FFFFFF"/>
+            <Setter Property="CornerRadius" Value="10,10,0,0"/>
+        </Style>
+        <Style Selector="Button.cardHeader:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="#25FFFFFF"/>
+        </Style>
+
+        <Style Selector="Button.cardIconBtn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.cardIconBtn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#15FFFFFF"/>
+        </Style>
+
+        <Style Selector="Button.headerBtn">
+            <Setter Property="Background" Value="#1E1E38"/>
+            <Setter Property="BorderBrush" Value="#35354E"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.headerBtn:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#2A2A50"/>
+        </Style>
+        <Style Selector="Button.headerBtn:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="#333360"/>
+        </Style>
+    </Window.Styles>
+
+    <DockPanel>
+
+        <!-- Header -->
+        <Border DockPanel.Dock="Top" Background="#0D0D1A" Padding="16,12">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="🌡" FontSize="18" VerticalAlignment="Center"/>
+                    <TextBlock Text="TempControl"
+                               Foreground="White"
+                               FontSize="16"
+                               FontWeight="Bold"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <Button Classes="headerBtn"
+                            Command="{Binding ToggleAlwaysOnTopCommand}"
+                            ToolTip.Tip="Siempre encima">
+                        <TextBlock Text="📌" FontSize="11"
+                                   Opacity="{Binding PinOpacity}"
+                                   VerticalAlignment="Center"/>
+                    </Button>
+                    <Button Classes="headerBtn"
+                            Command="{Binding ToggleMinMaxCommand}"
+                            ToolTip.Tip="{Binding EyeTooltip}">
+                        <TextBlock Text="👁" FontSize="11"
+                                   Opacity="{Binding EyeOpacity}"
+                                   VerticalAlignment="Center"/>
+                    </Button>
+                    <Button Classes="headerBtn"
+                            Command="{Binding ToggleUnitCommand}"
+                            ToolTip.Tip="{Binding UnitTooltip}">
+                        <TextBlock Text="{Binding UnitLabel}"
+                                   Foreground="#C0C0D8"
+                                   FontWeight="SemiBold" FontSize="13"
+                                   VerticalAlignment="Center"/>
+                    </Button>
+                    <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                        <TextBlock Classes="label" Text="Updated" VerticalAlignment="Center"/>
+                        <TextBlock Classes="label" Text="{Binding LastUpdated}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Footer -->
+        <Border DockPanel.Dock="Bottom" Padding="0,6,0,8">
+            <TextBlock Text="shipped by @Gallo"
+                       Foreground="#9E9E9E"
+                       FontSize="11"
+                       FontWeight="Medium"
+                       HorizontalAlignment="Center"/>
+        </Border>
+
+        <!-- Bottom info panel: alerts + icon legend -->
+        <Border DockPanel.Dock="Bottom" Background="#0D0D1A" Padding="14,10,14,12">
+            <StackPanel Spacing="8">
+
+                <!-- Active alerts (only visible when there are alerts) -->
+                <ItemsControl IsVisible="{Binding HasActiveAlerts}"
+                              ItemsSource="{Binding ActiveAlerts}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:CompileBindings="False">
+                            <TextBlock Text="{Binding}"
+                                       Foreground="#FFCC80"
+                                       FontSize="11"
+                                       TextWrapping="Wrap"
+                                       Margin="0,1"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Rectangle Height="1" Fill="#1E1E38"
+                           IsVisible="{Binding HasActiveAlerts}"/>
+
+                <!-- Icon legend -->
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
+                    <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Spacing="5" Margin="0,2">
+                        <TextBlock Text="📌" FontSize="10" VerticalAlignment="Center"/>
+                        <TextBlock Text="Siempre encima" Classes="label" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" Spacing="5" Margin="0,2">
+                        <TextBlock Text="👁" FontSize="10" VerticalAlignment="Center"/>
+                        <TextBlock Text="Mostrar/ocultar mín/máx" Classes="label" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Spacing="5" Margin="0,2">
+                        <TextBlock Text="°C" FontSize="10" Foreground="#9E9E9E" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <TextBlock Text="Cambiar unidad" Classes="label" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Spacing="5" Margin="0,2">
+                        <TextBlock Text="🔔" FontSize="10" VerticalAlignment="Center"/>
+                        <TextBlock Text="Clic para configurar alerta" Classes="label" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+
+            </StackPanel>
+        </Border>
+
+        <!-- Sensor list -->
+        <ScrollViewer Padding="12,8">
+            <ItemsControl ItemsSource="{Binding Groups}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:HardwareGroupViewModel">
+                        <Border Margin="0,4" Background="#252540" CornerRadius="10"
+                                BorderBrush="{Binding CardBorderBrush}"
+                                BorderThickness="1.5">
+                            <StackPanel>
+
+                                <!-- Clickable header row -->
+                                <Button Classes="cardHeader"
+                                        Command="{Binding ToggleExpandedCommand}">
+                                    <Grid ColumnDefinitions="*,Auto,Auto,Auto,20">
+                                        <TextBlock Classes="groupTitle"
+                                                   Text="{Binding Name}"
+                                                   VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"/>
+
+                                        <!-- Min / Max session -->
+                                        <StackPanel Grid.Column="1"
+                                                    IsVisible="{Binding IsMinMaxVisible}"
+                                                    Orientation="Horizontal" Spacing="4"
+                                                    VerticalAlignment="Center"
+                                                    Margin="8,0,6,0">
+                                            <TextBlock Text="{Binding SessionMaxDisplay}"
+                                                       Foreground="#EF5350"
+                                                       FontSize="9"
+                                                       FontWeight="SemiBold"/>
+                                            <TextBlock Text="{Binding SessionMinDisplay}"
+                                                       Foreground="#42A5F5"
+                                                       FontSize="9"
+                                                       FontWeight="SemiBold"/>
+                                        </StackPanel>
+
+                                        <!-- Alert bell (left-click opens flyout) -->
+                                        <Button Grid.Column="2"
+                                                Classes="cardIconBtn"
+                                                Margin="4,0,4,0"
+                                                ToolTip.Tip="Configurar alerta de temperatura">
+                                            <Button.Flyout>
+                                                <Flyout>
+                                                    <StackPanel x:DataType="vm:HardwareGroupViewModel"
+                                                                Spacing="10" Width="210" Margin="4">
+                                                        <TextBlock Text="Alerta de temperatura"
+                                                                   FontSize="12"
+                                                                   FontWeight="SemiBold"/>
+                                                        <ToggleSwitch IsChecked="{Binding IsAlertEnabled}"
+                                                                      OnContent="Activada"
+                                                                      OffContent="Desactivada"/>
+                                                        <StackPanel Orientation="Horizontal" Spacing="8"
+                                                                    IsEnabled="{Binding IsAlertEnabled}">
+                                                            <NumericUpDown Value="{Binding AlertThresholdValue}"
+                                                                           Minimum="{Binding ThresholdMin}"
+                                                                           Maximum="{Binding ThresholdMax}"
+                                                                           Increment="5"
+                                                                           FormatString="F0"
+                                                                           Width="120"/>
+                                                            <TextBlock Text="{Binding ThresholdUnitLabel}"
+                                                                       VerticalAlignment="Center"
+                                                                       FontSize="12"/>
+                                                        </StackPanel>
+                                                    </StackPanel>
+                                                </Flyout>
+                                            </Button.Flyout>
+                                            <TextBlock Text="🔔"
+                                                       FontSize="11"
+                                                       Opacity="{Binding BellOpacity}"
+                                                       VerticalAlignment="Center"/>
+                                        </Button>
+
+                                        <!-- Current temp badge -->
+                                        <Border Grid.Column="3"
+                                                Background="{Binding SummaryBadgeBrush}"
+                                                CornerRadius="4"
+                                                Padding="8,3">
+                                            <TextBlock Classes="value"
+                                                       Text="{Binding SummaryDisplayValue}"/>
+                                        </Border>
+
+                                        <TextBlock Grid.Column="4"
+                                                   Text="{Binding ExpandIcon}"
+                                                   Foreground="#666688"
+                                                   FontSize="9"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"
+                                                   Margin="6,0,0,0"/>
+                                    </Grid>
+                                </Button>
+
+                                <!-- Collapsible sensor detail -->
+                                <StackPanel IsVisible="{Binding IsExpanded}"
+                                            Margin="14,0,14,12"
+                                            Spacing="8">
+                                    <Rectangle Height="1" Fill="#333355"/>
+                                    <ItemsControl ItemsSource="{Binding Sensors}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="vm:SensorViewModel">
+                                                <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,2">
+                                                    <TextBlock Classes="label"
+                                                               Text="{Binding Name}"
+                                                               VerticalAlignment="Center"
+                                                               TextTrimming="CharacterEllipsis"/>
+                                                    <StackPanel Grid.Column="1"
+                                                                IsVisible="{Binding IsMinMaxVisible}"
+                                                                Orientation="Horizontal" Spacing="4"
+                                                                VerticalAlignment="Center"
+                                                                Margin="8,0,6,0">
+                                                        <TextBlock Text="{Binding SessionMaxDisplay}"
+                                                                   Foreground="#AABBCC"
+                                                                   FontSize="9"
+                                                                   FontWeight="SemiBold"/>
+                                                        <TextBlock Text="{Binding SessionMinDisplay}"
+                                                                   Foreground="#8899AA"
+                                                                   FontSize="9"
+                                                                   FontWeight="SemiBold"/>
+                                                    </StackPanel>
+                                                    <Border Grid.Column="2"
+                                                            Background="{Binding BadgeBrush}"
+                                                            CornerRadius="4"
+                                                            Padding="8,3"
+                                                            Width="54">
+                                                        <TextBlock Classes="value"
+                                                                   Text="{Binding DisplayValue}"
+                                                                   TextAlignment="Center"/>
+                                                    </Border>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+    </DockPanel>
+</Window>

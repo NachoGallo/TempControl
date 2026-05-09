@@ -1,0 +1,15 @@
+## Build artifacts
+bin/
+obj/
+publish/
+*.zip
+
+## IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+## Claude Code memory
+.claude/
